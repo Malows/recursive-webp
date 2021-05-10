@@ -29,10 +29,6 @@ fn main() -> std::io::Result<()> {
         )
         .get_matches();
 
-    if !helpers::check_webp_dependency() {
-        return Ok(());
-    }
-
     let quality = matches.value_of("quality").unwrap();
 
     let path = helpers::working_path(matches.value_of("directory").unwrap()).unwrap();
@@ -41,6 +37,10 @@ fn main() -> std::io::Result<()> {
 
     if matches.is_present("dry-run") {
         runners::display_files(path.to_str().unwrap(), forced);
+        return Ok(());
+    }
+
+    if !helpers::check_webp_dependency() {
         return Ok(());
     }
 
