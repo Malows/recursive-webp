@@ -11,9 +11,9 @@ fn main() -> std::io::Result<()> {
         .author(crate_authors!("\n"))
         .about("Walk recursively a directory and create a webp of every image")
         .arg_from_usage(
-            "[dry-run] --d --dry-run 'Run the program and print what files should be generated'",
+            "[dry-run] -d --dry-run 'Run the program and print what files should be generated'",
         )
-        .arg_from_usage("[forced] --F --forced 'Overwite previously generated webp files'")
+        .arg_from_usage("[forced] -F --forced 'Overwite previously generated webp files'")
         .arg(
             Arg::with_name("quality")
                 .help("Target quality of the webp images")
