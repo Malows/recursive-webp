@@ -2,24 +2,33 @@ use glob::glob;
 use std::env::current_dir;
 use std::path::Path;
 use std::process::{Command, Output};
+use indicatif::{ProgressBar, ProgressStyle};
+
 
 pub fn convert_files(path: &str, quality: &str, forced: bool) {
     let files = get_files(path, forced);
 
+    let length = files.len();
+
+    let progress_bar = ProgressBar::new(length as u64);
+
+    progress_bar.set_style(ProgressStyle::default_bar().template("{elapsed_precise} {wide_bar} {pos:>7}/{len:7}"));
+
     for image in files {
         convert(image.as_str(), quality).unwrap();
+        progress_bar.inc(1);
     }
 }
 
 pub fn display_files(path: &str, forced: bool) {
     let files = get_files(path, forced);
 
+    let length = files.len();
+
     let path_buf = current_dir().unwrap();
 
     let mut root = String::from(path_buf.to_str().unwrap_or_default());
     root.push_str("/");
-
-    let length = files.len();
 
     println!("\nPosibles images to convert into webp\n");
 
