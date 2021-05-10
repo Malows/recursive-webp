@@ -6,7 +6,7 @@ use std::process::{Command, Output};
 pub fn convert_files(path: &str, quality: &str, forced: bool) {
     let mut files = get_files(path);
 
-    if forced {
+    if !forced {
         files = files
             .into_iter()
             .filter(|x| !exists_webp_file(x.to_string()))
@@ -21,7 +21,7 @@ pub fn convert_files(path: &str, quality: &str, forced: bool) {
 pub fn display_files(path: &str, forced: bool) {
     let mut files = get_files(path);
 
-    if forced {
+    if !forced {
         files = files
             .into_iter()
             .filter(|x| !exists_webp_file(x.to_string()))
