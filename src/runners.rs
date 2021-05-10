@@ -4,14 +4,7 @@ use std::path::Path;
 use std::process::{Command, Output};
 
 pub fn convert_files(path: &str, quality: &str, forced: bool) {
-    let mut files = get_files(path);
-
-    if !forced {
-        files = files
-            .into_iter()
-            .filter(|x| !exists_webp_file(x.to_string()))
-            .collect();
-    }
+    let files = get_files(path, forced);
 
     for image in files {
         convert(image.as_str(), quality).unwrap();
@@ -19,14 +12,7 @@ pub fn convert_files(path: &str, quality: &str, forced: bool) {
 }
 
 pub fn display_files(path: &str, forced: bool) {
-    let mut files = get_files(path);
-
-    if !forced {
-        files = files
-            .into_iter()
-            .filter(|x| !exists_webp_file(x.to_string()))
-            .collect();
-    }
+    let files = get_files(path, forced);
 
     let path_buf = current_dir().unwrap();
 
@@ -58,7 +44,7 @@ fn convert(file: &str, quality: &str) -> std::io::Result<Output> {
         .output();
 }
 
-fn get_files(path: &str) -> Vec<String> {
+fn get_files(path: &str, forced: bool) -> Vec<String> {
     let mut pattern = String::from(path);
 
     pattern.push_str("/**/*.jpg");
@@ -67,6 +53,7 @@ fn get_files(path: &str) -> Vec<String> {
         .unwrap()
         .into_iter()
         .map(|x| String::from(x.unwrap().to_str().unwrap()))
+        .filter(|x| forced || !exists_webp_file(x.to_string()))
         .collect();
 
     return list;
