@@ -2,6 +2,7 @@ extern crate clap;
 
 use clap::{crate_authors, crate_version, App, Arg};
 
+mod fs;
 mod helpers;
 mod runners;
 

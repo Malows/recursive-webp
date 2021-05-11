@@ -1,12 +1,11 @@
-use glob::glob;
 use std::env::current_dir;
-use std::path::Path;
 use std::process::{Command, Output};
 
+use super::fs;
 use super::helpers;
 
 pub fn convert_files(path: &str, quality: &str, forced: bool, silent: bool) {
-    let files = get_files(path, forced);
+    let files = fs::get_files(path, forced);
 
     if silent {
         for image in files {
@@ -26,7 +25,7 @@ pub fn convert_files(path: &str, quality: &str, forced: bool, silent: bool) {
 }
 
 pub fn display_files(path: &str, forced: bool, silent: bool) {
-    let files = get_files(path, forced);
+    let files = fs::get_files(path, forced);
 
     let length = files.len();
 
@@ -48,7 +47,7 @@ pub fn display_files(path: &str, forced: bool, silent: bool) {
 
 fn convert(file: &str, quality: &str) -> std::io::Result<Output> {
     let _file = String::from(file);
-    let webp = file_to_webp(_file);
+    let webp = fs::file_to_webp(_file);
     let target = webp.as_str();
 
     return Command::new("cwebp")
@@ -58,31 +57,4 @@ fn convert(file: &str, quality: &str) -> std::io::Result<Output> {
         .arg("-o")
         .arg(target)
         .output();
-}
-
-fn get_files(path: &str, forced: bool) -> Vec<String> {
-    let mut pattern = String::from(path);
-
-    pattern.push_str("/**/*.jpg");
-
-    let list: Vec<String> = glob(pattern.as_str())
-        .unwrap()
-        .into_iter()
-        .map(|x| String::from(x.unwrap().to_str().unwrap()))
-        .filter(|x| forced || !exists_webp_file(x.to_string()))
-        .collect();
-
-    return list;
-}
-
-fn file_to_webp(path: String) -> String {
-    let (_, extension) = path.rsplit_once(".").unwrap();
-
-    let possible_file = path.replace(extension, "webp");
-
-    return possible_file;
-}
-
-fn exists_webp_file(path: String) -> bool {
-    return Path::new(file_to_webp(path).as_str()).exists();
 }
