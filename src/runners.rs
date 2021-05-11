@@ -1,8 +1,9 @@
 use glob::glob;
-use indicatif::{ProgressBar, ProgressStyle};
 use std::env::current_dir;
 use std::path::Path;
 use std::process::{Command, Output};
+
+use super::helpers;
 
 pub fn convert_files(path: &str, quality: &str, forced: bool, silent: bool) {
     let files = get_files(path, forced);
@@ -16,11 +17,7 @@ pub fn convert_files(path: &str, quality: &str, forced: bool, silent: bool) {
 
     let length = files.len();
 
-    let progress_bar = ProgressBar::new(length as u64);
-
-    progress_bar.set_style(
-        ProgressStyle::default_bar().template("{elapsed_precise} {wide_bar} {pos:>7}/{len:7}"),
-    );
+    let progress_bar = helpers::progress_bar(length as u64);
 
     for image in files {
         convert(image.as_str(), quality).unwrap();

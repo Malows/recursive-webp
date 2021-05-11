@@ -1,3 +1,4 @@
+use indicatif::{ProgressBar, ProgressStyle};
 use std::{env, process::Command};
 
 pub fn working_path(directory: &str) -> std::io::Result<std::path::PathBuf> {
@@ -26,4 +27,14 @@ pub fn check_webp_dependency() -> bool {
             return false;
         }
     };
+}
+
+pub fn progress_bar(length: u64) -> ProgressBar {
+    let progress_bar = ProgressBar::new(length as u64);
+
+    progress_bar.set_style(
+        ProgressStyle::default_bar().template("{elapsed_precise} {wide_bar} {pos:>7}/{len:7}"),
+    );
+
+    return progress_bar;
 }
