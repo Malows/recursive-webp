@@ -7,7 +7,8 @@ use super::helpers;
 use super::Context;
 
 pub fn convert_files(ctx: &Context) {
-    let iter = ctx.files
+    let iter = ctx
+        .files
         .par_iter()
         .map(|image| convert(image, ctx.quality).unwrap());
 

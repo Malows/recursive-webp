@@ -1,4 +1,3 @@
-// use clap::{ App, Arg};
 use clap::{arg, command, crate_authors, crate_version, ArgMatches, Command};
 
 mod fs;
@@ -9,6 +8,7 @@ fn cli() -> Command {
     command!()
         .version(crate_version!())
         .author(crate_authors!("\n"))
+        .about("Walk recursively a directory and create a webp of every image")
         .args([
             arg!(-d --dry-run "Print what files should be generated"),
             arg!(-s --silent "Display less or none information on the execution"),
