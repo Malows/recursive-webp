@@ -1,39 +1,38 @@
+use rayon::prelude::*;
 use std::env::current_dir;
 use std::process::{Command, Output};
 
 use super::fs;
 use super::helpers;
+use super::Arguments;
 
-pub fn convert_files(path: &str, quality: &str, forced: bool, silent: bool) {
-    let files = fs::get_files(path, forced);
+pub fn convert_files(args: &Arguments) {
+    let files = fs::get_files(&args.path, args.forced);
 
-    if silent {
-        for image in files {
-            convert(image.as_str(), quality).unwrap();
-        }
-        return ();
+    let iter = files
+        .par_iter()
+        .map(|image| convert(image.as_str(), args.quality).unwrap());
+
+    if !args.silent {
+        let length = files.len() as u64;
+
+        let progress_bar = helpers::progress_bar(length);
+
+        iter.clone().for_each(|_| progress_bar.inc(1));
     }
 
-    let length = files.len();
-
-    let progress_bar = helpers::progress_bar(length as u64);
-
-    for image in files {
-        convert(image.as_str(), quality).unwrap();
-        progress_bar.inc(1);
-    }
+    let _ = iter.collect::<Vec<_>>();
 }
 
-pub fn display_files(path: &str, forced: bool, silent: bool) {
-    let files = fs::get_files(path, forced);
+pub fn display_files(args: &Arguments) {
+    let files = fs::get_files(&args.path, args.forced);
 
     let length = files.len();
 
-    if !silent {
+    if !args.silent {
         let path_buf = current_dir().unwrap();
 
-        let mut root = String::from(path_buf.to_str().unwrap_or_default());
-        root.push_str("/");
+        let root = format!("{}/", path_buf.to_str().unwrap_or_default());
 
         println!("\nPosibles images to convert into webp\n");
 
@@ -42,17 +41,17 @@ pub fn display_files(path: &str, forced: bool, silent: bool) {
         }
     }
 
-    println!("\nA total of {} files.\n", length);
+    println!("\nA total of {length} files.\n");
 }
 
-fn convert(file: &str, quality: &str) -> std::io::Result<Output> {
+fn convert(file: &str, quality: u8) -> std::io::Result<Output> {
     let _file = String::from(file);
     let webp = fs::file_to_webp(_file);
     let target = webp.as_str();
 
     return Command::new("cwebp")
         .arg("-q")
-        .arg(quality)
+        .arg(quality.to_string().as_str())
         .arg(file)
         .arg("-o")
         .arg(target)

@@ -33,7 +33,9 @@ pub fn progress_bar(length: u64) -> ProgressBar {
     let progress_bar = ProgressBar::new(length as u64);
 
     progress_bar.set_style(
-        ProgressStyle::default_bar().template("{elapsed_precise} {wide_bar} {pos:>7}/{len:7}"),
+        ProgressStyle::default_bar()
+            .template("{elapsed_precise} {wide_bar} {pos:>7}/{len:7}")
+            .unwrap(),
     );
 
     return progress_bar;

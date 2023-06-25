@@ -2,11 +2,19 @@
 name = "recursive-webp"
 version = "1.0.0"
 authors = ["Juan Manuel Cruz <cruz.jm.stafe@gmail.com>"]
-edition = "2018"
+edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[profile.release]
+strip = true
+opt-level = 's'
+lto = true
+# codegen-units = 1
+panic = 'abort'
+
 [dependencies]
-clap = "2.33.3"
-glob = "0.3.0"
-indicatif = "0.16.0"
+clap = { version = "4.3", features = ["cargo"] }
+glob = "0.3"
+indicatif = "0.17"
+rayon = "1.7.0"

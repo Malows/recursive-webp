@@ -1,10 +1,8 @@
 use glob::glob;
 use std::path::Path;
 
-pub fn get_files(path: &str, forced: bool) -> Vec<String> {
-    let mut pattern = String::from(path);
-
-    pattern.push_str("/**/*.jpg");
+pub fn get_files(path: &String, forced: bool) -> Vec<String> {
+    let pattern = format!("{path}/**/*.jpg");
 
     let list: Vec<String> = glob(pattern.as_str())
         .unwrap()
