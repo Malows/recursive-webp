@@ -33,46 +33,39 @@ fn cli() -> Command {
 }
 
 pub struct Context {
-    pub dry_run: bool,
     pub silent: bool,
     pub quality: u8,
     pub files: Vec<String>,
 }
 
-fn get_context(args: ArgMatches) -> Context {
+fn get_context(args: ArgMatches) -> (Context, bool) {
     let dry_run = args.get_flag("dry-run");
     let silent = args.get_flag("silent");
     let forced = args.get_flag("forced");
 
     let quality = args.get_one::<u8>("quality").copied().unwrap();
 
-    let directory = args
-        .get_one::<String>("directory")
-        .cloned()
-        .unwrap();
+    let directory = args.get_one::<String>("directory").cloned().unwrap();
 
-    let extension = args
-        .get_one::<String>("extension")
-        .cloned()
-        .unwrap();
+    let extension = args.get_one::<String>("extension").cloned().unwrap();
 
     let path = helpers::working_path(directory.as_str()).unwrap();
     let path = path.to_str().unwrap();
 
     let files = fs::get_files(path, extension.as_str(), forced);
 
-    Context {
-        dry_run,
+    let ctx = Context {
         silent,
         quality,
         files,
-    }
+    };
+    (ctx, dry_run)
 }
 
 fn main() {
-    let ctx = get_context(cli().get_matches());
+    let (ctx, dry_run) = get_context(cli().get_matches());
 
-    if ctx.dry_run {
+    if dry_run {
         runners::display_files(&ctx);
         return ();
     }
