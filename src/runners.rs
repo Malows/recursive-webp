@@ -4,17 +4,15 @@ use std::process::{Command, Output};
 
 use super::fs;
 use super::helpers;
-use super::Arguments;
+use super::Context;
 
-pub fn convert_files(args: &Arguments) {
-    let files = fs::get_files(&args.path, args.forced);
-
-    let iter = files
+pub fn convert_files(ctx: &Context) {
+    let iter = ctx.files
         .par_iter()
-        .map(|image| convert(image.as_str(), args.quality).unwrap());
+        .map(|image| convert(image, ctx.quality).unwrap());
 
-    if !args.silent {
-        let length = files.len() as u64;
+    if !ctx.silent {
+        let length = ctx.files.len() as u64;
 
         let progress_bar = helpers::progress_bar(length);
 
@@ -24,19 +22,17 @@ pub fn convert_files(args: &Arguments) {
     let _ = iter.collect::<Vec<_>>();
 }
 
-pub fn display_files(args: &Arguments) {
-    let files = fs::get_files(&args.path, args.forced);
+pub fn display_files(ctx: &Context) {
+    let length = ctx.files.len();
 
-    let length = files.len();
-
-    if !args.silent {
+    if !ctx.silent {
         let path_buf = current_dir().unwrap();
 
         let root = format!("{}/", path_buf.to_str().unwrap_or_default());
 
         println!("\nPosibles images to convert into webp\n");
 
-        for file in files {
+        for file in ctx.files.iter() {
             println!("\t{}", file.replace(root.as_str(), ""));
         }
     }
@@ -44,9 +40,8 @@ pub fn display_files(args: &Arguments) {
     println!("\nA total of {length} files.\n");
 }
 
-fn convert(file: &str, quality: u8) -> std::io::Result<Output> {
-    let _file = String::from(file);
-    let webp = fs::file_to_webp(_file);
+fn convert(file: &String, quality: u8) -> std::io::Result<Output> {
+    let webp = fs::file_to_webp(file);
     let target = webp.as_str();
 
     return Command::new("cwebp")

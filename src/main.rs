@@ -12,21 +12,21 @@ fn cli() -> Command {
         .args([
             arg!(-d --dry-run "Print what files should be generated"),
             arg!(-s --silent "Display less or none information on the execution"),
-            arg!(-F --forced "Overwite previously generated webp files"),
+            arg!(-F --forced "Overwrite previously generated webp files"),
             arg!(-q --quality [QUALITY] "Target quality of the webp images"),
+            arg!(-e --extension [EXT] "Target extension to work with"),
             arg!([directory] "Starting directory"),
         ])
 }
 
-pub struct Arguments {
+pub struct Context {
     pub dry_run: bool,
     pub silent: bool,
-    pub forced: bool,
     pub quality: u8,
-    pub path: String,
+    pub files: Vec<String>,
 }
 
-fn get_arguments(args: ArgMatches) -> Arguments {
+fn get_context(args: ArgMatches) -> Context {
     let dry_run = args.get_flag("dry-run");
     let silent = args.get_flag("silent");
     let forced = args.get_flag("forced");
@@ -38,23 +38,29 @@ fn get_arguments(args: ArgMatches) -> Arguments {
         .cloned()
         .unwrap_or(String::from("."));
 
+    let extension = args
+        .get_one::<String>("extension")
+        .cloned()
+        .unwrap_or(String::from("jpg"));
+
     let path = helpers::working_path(directory.as_str()).unwrap();
     let path = path.to_str().unwrap();
 
-    Arguments {
+    let files = fs::get_files(path, extension.as_str(), forced);
+
+    Context {
         dry_run,
         silent,
-        forced,
         quality,
-        path: path.to_string(),
+        files,
     }
 }
 
 fn main() {
-    let args = get_arguments(cli().get_matches());
+    let ctx = get_context(cli().get_matches());
 
-    if args.dry_run {
-        runners::display_files(&args);
+    if ctx.dry_run {
+        runners::display_files(&ctx);
         return ();
     }
 
@@ -62,7 +68,5 @@ fn main() {
         return ();
     }
 
-    runners::convert_files(&args);
-
-    ()
+    runners::convert_files(&ctx);
 }
